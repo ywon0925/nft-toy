@@ -11,17 +11,19 @@ const getEthereumContract = () => {
     const signer = provider.getSigner();
     const NFTBusinessCardContract = new ethers.Contract(contractAddress, contractABI, signer);
 
-    console.log({
-        provider,
-        signer,
-        NFTBusinessCardContract
-    });
+    return NFTBusinessCardContract;
 }
 
 export const NFTBusinessCardProvider = ({ children }) => {
     const [currentAccount, setCurrentAccount] = useState('')
+    const [formData, setFormData] = useState({jobTitle: '',name:'', exp:'',resume:''})
 
-
+    const handleChange = (e, name) =>{
+        setFormData((prevState)=>({...prevState, [name]: e.target.value}));
+    }
+    const handleFileChange = (e, name) =>{
+        setFormData((prevState)=>({...prevState, [name]: e.target.files[0]}));   
+    }
     const checkIfWalletIsConnected = async () => {
         try {
             if (!ethereum) return alert("Please install metamask");
@@ -52,12 +54,26 @@ export const NFTBusinessCardProvider = ({ children }) => {
         }
     }
 
+    const createNFT = async() => {
+        try{
+            if(!ethereum) return alert("Please intstall metamask");
+            const {jobTitle, name, exp, resume} = formData;
+            console.log(jobTitle, name, exp, resume);
+            const nftContract = getEthereumContract();
+        }catch(error) {
+            console.log(error);
+
+            throw new Error("No ethereum object.");
+        }
+    }
+
+
     useEffect(() => {
         checkIfWalletIsConnected();
     }, []);
 
     return (
-        <NFTBusinessCardContext.Provider value={{ connectWallet, currentAccount }}>
+        <NFTBusinessCardContext.Provider value={{ connectWallet, currentAccount, formData, setFormData, handleChange, handleFileChange, createNFT }}>
             {children}
         </NFTBusinessCardContext.Provider>
     );
